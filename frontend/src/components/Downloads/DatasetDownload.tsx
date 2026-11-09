@@ -1080,7 +1080,7 @@ const DatasetDownloadForm: React.FC<React.PropsWithChildren<DatasetDownloadFormP
           className={cartTourTargets.downloadAllType.class()}
           defaultValue={downloadOptions[0]}
           data-testid="downloadTypeSelector"
-          style={{ width: 135, textAlign: 'center' }}
+          style={{ width: 150, textAlign: 'center' }}
           onSelect={(rawType) => {
             const downloadType: string = rawType;
             if (downloadType) {
