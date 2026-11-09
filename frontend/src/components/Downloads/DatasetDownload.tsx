@@ -84,7 +84,7 @@ export enum GlobusGoals {
 }
 
 // Statically defined list of dataset download options
-const downloadOptions = ['Globus', 'wget'];
+const downloadOptions = ['Globus', 'wget', 'RI-SCALE DEP'];
 
 /* istanbul ignore next -- @preserve */
 function redirectToNewURL(newUrl: string): void {
@@ -143,8 +143,8 @@ const DatasetDownloadForm: React.FC<React.PropsWithChildren<DatasetDownloadFormP
   const [selectedNodes] = useAtom<Record<string, string>>(selectedNodesAtom);
 
   const [downloadSelections] = useAtom(downloadSelectionsAtom) as unknown as [
-    Record<string, 'wget' | 'Globus' | 'esgpull'>,
-    (value: Record<string, 'wget' | 'Globus' | 'esgpull'>) => void,
+    Record<string, 'wget' | 'Globus' | 'RI-SCALE DEP' | 'esgpull'>,
+    (value: Record<string, 'wget' | 'Globus' | 'RI-SCALE DEP' | 'esgpull'>) => void,
   ];
 
   const [nodePreferences] = useAtom<string[]>(nodePreferencesAtom);
@@ -204,7 +204,7 @@ const DatasetDownloadForm: React.FC<React.PropsWithChildren<DatasetDownloadFormP
    */
   const getNodeChoiceForItem = (
     item: RawSearchResult,
-    downloadType: 'wget' | 'Globus',
+    downloadType: 'wget' | 'Globus' | 'RI-SCALE DEP',
   ): string | undefined => {
     if (!item.isStac) {
       return undefined; // Non-STAC items don't need node selection
@@ -384,6 +384,10 @@ const DatasetDownloadForm: React.FC<React.PropsWithChildren<DatasetDownloadFormP
           );
         });
     }
+  };
+
+  const handleRIScaleDownload = (): void => {
+    message.success('Transfering files to RI Scale...');
   };
 
   const getCurrentScope = (): string => {
@@ -977,10 +981,12 @@ const DatasetDownloadForm: React.FC<React.PropsWithChildren<DatasetDownloadFormP
     return true;
   };
 
-  const handleDownloadForm = (downloadType: 'wget' | 'Globus'): void => {
+  const handleDownloadForm = (downloadType: 'wget' | 'Globus' | 'RI-SCALE DEP'): void => {
     /* istanbul ignore else -- @preserve */
     if (downloadType === 'wget') {
       handleWgetDownload();
+    } else if (downloadType === 'RI-SCALE DEP') {
+      handleRIScaleDownload();
     } else if (downloadType === 'Globus') {
       let itemsReady = false;
       if (props.stacFeatures) {
@@ -1062,6 +1068,9 @@ const DatasetDownloadForm: React.FC<React.PropsWithChildren<DatasetDownloadFormP
       />
     );
   }, []);
+
+  const transferTypes = ['Globus', 'RI-SCALE DEP'];
+  const isTransferType = transferTypes.includes(selectedDownloadType);
 
   return (
     <>
@@ -1145,17 +1154,17 @@ const DatasetDownloadForm: React.FC<React.PropsWithChildren<DatasetDownloadFormP
         ) : (
           <Tooltip title={downloadBtnTooltip()} placement="top">
             <Button
-              data-testid="downloadDatasetWgetBtn"
-              className={cartTourTargets.downloadWgetBtn.class()}
+              data-testid={isTransferType ? 'downloadDatasetTransferBtns':'downloadDatasetWgetBtn'}
               type="primary"
+              className={isTransferType ? cartTourTargets.downloadTransferBtn.class():cartTourTargets.downloadWgetBtn.class()}
               onClick={() => {
-                handleDownloadForm('wget');
+                handleDownloadForm(selectedDownloadType);
               }}
               icon={<DownloadOutlined />}
               disabled={itemSelections.length === 0 && !props.stacFeatures}
               loading={downloadIsLoading}
             >
-              Download
+              {isTransferType ? 'Transfer':'Download'}
             </Button>
           </Tooltip>
         )}
